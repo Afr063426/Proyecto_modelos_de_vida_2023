@@ -12,3 +12,7 @@
 - The code is defined in a way that you don't have
   to change the directory your default folder is
   the folder where is the script Project.qmd
+
+- Use conventional commits that you can find in
+  this link
+  [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
