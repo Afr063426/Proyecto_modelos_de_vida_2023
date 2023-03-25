@@ -1,0 +1,19 @@
+```{r}
+#To set the default folder, it is going to be the folder where is the script
+directory <-dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(directory)
+
+#The direction to the data
+folder_data <- "./data"
+
+
+#The direction to the folder of plots
+folder_plots <- "./plots"
+
+
+#The direction to the folder of cleansed data
+folder_cleansed_data <- "./cleansed_data"
+
+
+
+```
