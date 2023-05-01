@@ -1,7 +1,13 @@
 ```{r}
+#To manipulate the data
+library(tidyverse)
+library(xtable)
+
 #To set the default folder, it is going to be the folder where is the script
 directory <-dirname(rstudioapi::getSourceEditorContext()$path)
 setwd(directory)
+
+
 
 #The direction to the data
 folder_data <- "./data"
@@ -15,5 +21,103 @@ folder_plots <- "./plots"
 folder_cleansed_data <- "./cleansed_data"
 
 
+df_heart_failures <- read.table(paste(folder_data,"/heart_failure_clinical_records_dataset.csv",sep = ""), sep =",", header = TRUE)
 
+
+#df_heart_failures%>%group_by(sex) %>% summarise(CONTEO = n())
+```
+
+
+# Table
+
+We show the first 5 rows of the table
+```{r}
+#The first five rows
+head_first_5 <- head(df_heart_failures, n=5)
+
+
+#To generate latex code to paste 
+print(xtable(head_first_5, type = "latex", tabular.environment="longtable"),
+    include.rownames=FALSE, file = "head_5.tex")
+```
+
+# Five number summary and average
+
+```{r}
+
+#Data frame with the variables of importance
+table_for_summary <- df_heart_failures %>% 
+select(age, creatinine_phosphokinase, ejection_fraction, platelets, serum_creatinine, serum_sodium, time) 
+
+
+
+#Empty data frame to put the data
+summary_5_number <- data.frame("Variable" = character(),
+                "Mínimo"=numeric(), 
+                "Q1"=numeric(),
+                "Mediana"=numeric(),
+                "Q3"=numeric(),
+                "Máximo"=numeric(),
+                "Promedio" = numeric()
+                )
+
+
+#Function for summary 5 numbers and mean for each variable
+summary_data_frame <- function(df){
+    quantiles <- quantile(df, na.rm = TRUE)
+    Mean <- mean(df, na.rm = TRUE)
+    df_summary <- data.frame("Mínimo"=quantiles[1], 
+                "Q1"=quantiles[2],
+                "Mediana"=quantiles[3],
+                "Q3"=quantiles[4],
+                "Máximo"=quantiles[5],
+                "Promedio" = Mean)
+    return(df_summary)
+}
+
+#To compute the value for each column
+for(i in colnames(table_for_summary)){
+    aux <- cbind("Variable" = i, summary_data_frame(as.numeric(unlist(table_for_summary%>%select(sym(i))))))
+    summary_5_number <- rbind(summary_5_number, aux)
+}
+
+
+
+#To generate latex code to paste it is saved in summary_5_number
+print(xtable(summary_5_number, type = "latex", tabular.environment="longtable"),
+    include.rownames=FALSE, file = "summary_5_number.tex")
+```
+
+# Medidas de dispersión
+```{r}
+
+dispersion_summary <- data.frame("Variable" = character(),
+                                 "Desviación estándar" = numeric(),
+                                 "Rango intercuartílico" = numeric(),
+                                 "Coeficiente de variación" = numeric()
+                )
+
+
+#Function for dispersion values
+dispersion_data_frame <- function(df){
+    sd <- sd(df) #Standar desviation
+    iqr <- IQR(df) #Interquartile range
+    cv<- sd(df)/mean(df) #Variation coefficient
+    df_summary <- data.frame("Desviación estándar" = sd,
+                             "Rango intercuartílico" = iqr,
+                             "Coeficiente de variación" = cv)
+    return(df_summary)
+}
+
+#To compute the value for each column
+for(i in colnames(table_for_summary)){
+    aux <- cbind("Variable" = i, summary_data_frame(as.numeric(unlist(table_for_summary%>%select(sym(i))))))
+    dispersion_summary <- rbind(dispersion_summary, aux)
+}
+
+
+
+#To generate latex code to paste it is saved in dispersion_measures
+print(xtable(dispersion_summary, type = "latex", tabular.environment="longtable"),
+    include.rownames=FALSE, file = "dispersion_measures.tex")
 ```
