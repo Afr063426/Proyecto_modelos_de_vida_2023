@@ -121,3 +121,13 @@ for(i in colnames(table_for_summary)){
 print(xtable(dispersion_summary, type = "latex", tabular.environment="longtable"),
     include.rownames=FALSE, file = "dispersion_measures.tex")
 ```
+
+
+
+
+```{r}
+
+Hola
+
+```
+
