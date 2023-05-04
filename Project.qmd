@@ -2,6 +2,7 @@
 #To manipulate the data
 library(tidyverse)
 library(xtable)
+library(ggcorrplot)
 
 #To set the default folder, it is going to be the folder where is the script
 directory <-dirname(rstudioapi::getSourceEditorContext()$path)
@@ -121,3 +122,74 @@ for(i in colnames(table_for_summary)){
 print(xtable(dispersion_summary, type = "latex", tabular.environment="longtable"),
     include.rownames=FALSE, file = "dispersion_measures.tex")
 ```
+
+
+
+
+```{r}
+Datos_aux_g<-df_heart_failures
+
+
+colnames(Datos_aux_g) <-c("Edad", "Anemia", "C.fosfoquinasa", "Diabetes", "Fracción de eyección", "Hipertensión", "Plaquetas", "C. sérica", "Sodio sérico", "Sexo", "Fumado", "Tiempo", "Eveto de muerte" )
+
+ggcorrplot(cor(Datos_aux_g%>%select(-Tiempo) ,use = "complete.obs"))
+
+# ggsave("cor_means.pdf",ggcorrplot(cor(data_means[,-c(1,2)],use = "complete.obs")))
+```
+
+
+
+```{r}
+
+
+Datos_aux_g<-cbind(Datos_aux_g, "Invervalos_Edad"=cut(Datos_aux_g$Edad,breaks=seq(min(Datos_aux_g$Edad), max(Datos_aux_g$Edad), 5),   dig.lab = 2,right = F, na.rm = T, include.lowest = TRUE))
+
+
+
+
+
+Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`))+
+  geom_point(colour ="#018695")+
+  labs(x="Edad")+
+  theme_minimal()
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
