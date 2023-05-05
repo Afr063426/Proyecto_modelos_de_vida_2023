@@ -132,9 +132,9 @@ Datos_aux_g<-df_heart_failures
 
 colnames(Datos_aux_g) <-c("Edad", "Anemia", "C.fosfoquinasa", "Diabetes", "Fracción de eyección", "Hipertensión", "Plaquetas", "C. sérica", "Sodio sérico", "Sexo", "Fumado", "Tiempo", "Eveto de muerte" )
 
-ggcorrplot(cor(Datos_aux_g%>%select(-Tiempo) ,use = "complete.obs"))
 
-# ggsave("cor_means.pdf",ggcorrplot(cor(data_means[,-c(1,2)],use = "complete.obs")))
+
+ ggsave("ggcorr.pdf",ggcorrplot(cor(Datos_aux_g%>%select(-Tiempo) ,use = "complete.obs")))
 ```
 
 
@@ -148,14 +148,14 @@ Datos_aux_g<-cbind(Datos_aux_g, "Invervalos_Edad"=cut(Datos_aux_g$Edad,breaks=se
 
 
 
-Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`))+
+gg_asociasion<-Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`))+
   geom_point(colour ="#018695")+
   labs(x="Edad")+
   theme_minimal()
 
 
 
-
+ ggsave("gg_asociasion.pdf",gg_asociasion)
 
 ```
 
