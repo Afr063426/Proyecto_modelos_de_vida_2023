@@ -25,6 +25,20 @@ folder_cleansed_data <- "./cleansed_data"
 df_heart_failures <- read.table(paste(folder_data,"/heart_failure_clinical_records_dataset.csv",sep = ""), sep =",", header = TRUE)
 
 
+df_heart_failures$anaemia<-as.factor(df_heart_failures$anaemia)
+df_heart_failures$diabetes<-as.factor(df_heart_failures$diabetes)
+df_heart_failures$high_blood_pressure<-as.factor(df_heart_failures$high_blood_pressure)
+df_heart_failures$sex<-as.factor(df_heart_failures$sex)
+df_heart_failures$smoking<-as.factor(df_heart_failures$smoking)
+df_heart_failures$DEATH_EVENT<-as.factor(df_heart_failures$DEATH_EVENT)
+
+
+
+
+
+
+
+
 #df_heart_failures%>%group_by(sex) %>% summarise(CONTEO = n())
 ```
 
@@ -158,38 +172,3 @@ gg_asociasion<-Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyecc
  ggsave("gg_asociasion.pdf",gg_asociasion)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
