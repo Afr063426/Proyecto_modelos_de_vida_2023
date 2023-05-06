@@ -24,13 +24,13 @@ folder_cleansed_data <- "./cleansed_data"
 
 df_heart_failures <- read.table(paste(folder_data,"/heart_failure_clinical_records_dataset.csv",sep = ""), sep =",", header = TRUE)
 
-
-df_heart_failures$anaemia<-as.factor(df_heart_failures$anaemia)
-df_heart_failures$diabetes<-as.factor(df_heart_failures$diabetes)
-df_heart_failures$high_blood_pressure<-as.factor(df_heart_failures$high_blood_pressure)
-df_heart_failures$sex<-as.factor(df_heart_failures$sex)
-df_heart_failures$smoking<-as.factor(df_heart_failures$smoking)
-df_heart_failures$DEATH_EVENT<-as.factor(df_heart_failures$DEATH_EVENT)
+# 
+# df_heart_failures$anaemia<-as.factor(df_heart_failures$anaemia)
+# df_heart_failures$diabetes<-as.factor(df_heart_failures$diabetes)
+# df_heart_failures$high_blood_pressure<-as.factor(df_heart_failures$high_blood_pressure)
+# df_heart_failures$sex<-as.factor(df_heart_failures$sex)
+# df_heart_failures$smoking<-as.factor(df_heart_failures$smoking)
+# df_heart_failures$DEATH_EVENT<-as.factor(df_heart_failures$DEATH_EVENT)
 
 
 
@@ -144,9 +144,9 @@ print(xtable(dispersion_summary, type = "latex", tabular.environment="longtable"
 Datos_aux_g<-df_heart_failures
 
 
-colnames(Datos_aux_g) <-c("Edad", "Anemia", "C.fosfoquinasa", "Diabetes", "Fracción de eyección", "Hipertensión", "Plaquetas", "C. sérica", "Sodio sérico", "Sexo", "Fumado", "Tiempo", "Eveto de muerte" )
+colnames(Datos_aux_g) <-c("Edad", "Anemia", "C. fosfoquinasa", "Diabetes", "Fracción de eyección", "Hipertensión", "Plaquetas", "C. sérica", "Sodio sérico", "Sexo", "Fumado", "Tiempo", "Evento de muerte" )
 
-
+ggcorrplot(cor(Datos_aux_g%>%select(-Tiempo) ,use = "complete.obs"))
 
  ggsave("ggcorr.pdf",ggcorrplot(cor(Datos_aux_g%>%select(-Tiempo) ,use = "complete.obs")))
 ```
@@ -162,8 +162,8 @@ Datos_aux_g<-cbind(Datos_aux_g, "Invervalos_Edad"=cut(Datos_aux_g$Edad,breaks=se
 
 
 
-gg_asociasion<-Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`))+
-  geom_point(colour ="#018695")+
+Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`, color =Sexo))+
+  geom_line()+
   labs(x="Edad")+
   theme_minimal()
 
