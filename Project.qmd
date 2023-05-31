@@ -172,3 +172,163 @@ Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`, color =S
  ggsave("gg_asociasion.pdf",gg_asociasion)
 
 ```
+
+
+```{r}
+
+library(readr)
+library(ggplot2)
+library(extrafont)
+library(grid)
+library(libcoin)
+library(mvtnorm)
+library(partykit)
+
+```
+
+```{r}
+#font_import()
+#y
+
+colores <- c("#619CFF", "#F8766D")
+
+baseDatos <- read_csv("data/heart_failure_clinical_records_dataset.csv")
+
+edadesSexo <- data.frame(Edad = c(baseDatos$age[which(baseDatos$sex == 1)],
+                             baseDatos$age[which(baseDatos$sex == 0)]),
+                    Sexo = c(rep("Hombres", 194),
+                             rep("Mujeres", 105)))
+
+ggplot(edadesSexo, aes(x = Edad, fill = Sexo)) +   
+  geom_histogram(position = "identity", alpha = 0.7, bins = 30)+
+  ylab("Cantidad de personas")+
+  xlab("Edades")+
+  theme_minimal()+
+  scale_fill_manual(values = colores)+
+  scale_y_continuous(limits = c(0, 25), breaks = seq(0, 25, by = 5), minor_breaks = seq(0, 25, by = 5))+
+  scale_x_continuous(limits = c(40, 95), breaks = seq(40, 95, by = 5), minor_breaks = seq(40, 95, by = 5))+
+  theme(text=element_text(size=16,  family="Times New Roman"))
+
+
+fracEyH <- baseDatos %>% filter(sex == 1)
+
+fracEyM <- baseDatos %>% filter(sex == 0)
+
+fracEy <- cbind(fracEyH$ejection_fraction, c(fracEyM$ejection_fraction, 
+                                             rep(NA, length(fracEyH$ejection_fraction)-
+                                                   length(fracEyM$ejection_fraction))))
+
+rangosEyeccion <- c()
+rangosEyeccion[1] <- sum(fracEy[,1] < 30)
+rangosEyeccion[2] <- sum(fracEy[,1] >= 30 & fracEy[,1] < 40)
+rangosEyeccion[3] <- sum(fracEy[,1] > 40 & fracEy[,1] <= 51)
+rangosEyeccion[4] <- sum(fracEy[,1] > 51)
+rangosEyeccion[5] <- sum(fracEy[,2] < 30, na.rm = TRUE)
+rangosEyeccion[6] <- sum(fracEy[,2] >= 30 & fracEy[,1] < 40, na.rm = TRUE)
+rangosEyeccion[7] <- sum(fracEy[,2] > 40 & fracEy[,1] <= 53, na.rm = TRUE)
+rangosEyeccion[8] <- sum(fracEy[,2] > 54, na.rm = TRUE)
+
+rangosEyeccion <- cbind(rangosEyeccion, c(rep(1, 4), rep(0, 4)))
+
+rangosEyeccion <- as.data.frame(cbind(rangosEyeccion, c("Adecuada", "Leve",
+                                          "Moderada", "Severa")))
+
+colnames(rangosEyeccion)<- c("Cantidad", "Sexo", "Rango")
+
+ggplot(data=rangosEyeccion)+
+  geom_col(aes(x=Rango, y=Cantidad, fill=Sexo), position=position_dodge())+
+  scale_fill_manual(values = colores, label = c('Hombres', 'Mujeres'))+
+  theme(text=element_text(size=16,  family="Times New Roman"))+
+  ylab("Cantidad de personas")+
+  xlab("Categoría de la fracción de eyección")+
+  #scale_y_discrete(label = seq(10,90,10))+
+  theme_minimal()
+
+rangosEyeccion <- as.data.frame(rangosEyeccion)
+colnames(rangosEyeccion) <- c("Cantidad", "Sexo", "Rango")
+
+
+FraccionEyeccion <- data.frame(FraccionEyeccion = c(fracEyH$ejection_fraction,                  
+                                        fracEyM$ejection_fraction),
+                   Sexo = c(rep("Hombres", 194),
+                            rep("Mujeres", 105)))
+
+
+ggplot(FraccionEyeccion, aes(x = FraccionEyeccion, fill = Sexo))+
+  #theme(text = element_text(family = "TT Times New Roman"))+
+  geom_histogram(position = "identity", alpha = 0.8, bins = 8)+
+  annotate("text", x = 65, y = 41, label = "Adecuado", color = 'black', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=51.1, xmax=82, ymin=0, ymax=36, alpha=.15, color='darkgreen', fill = NA)+
+  annotate("text", x = 35, y = 41, label = "Disminución", color = 'black', size = 5,  family="Times New Roman")+
+  annotate("text", x = 46, y = 38, label = "Leve", color = '#FFC425', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=41.1, xmax=50.9, ymin=0, ymax=36, alpha=.15, color='#FFC425') +
+  annotate("text", x = 35.5, y = 38, label = "Moderada", color = '#F37735', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=30.1, xmax=40.9, ymin=0, ymax=36, alpha=.15, color='#F37735') +
+  annotate("text", x = 20.1, y = 38, label = "Severa", color = 'red', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=10, xmax=29.9, ymin=0, ymax=36, alpha=.15, color='red')+
+  scale_fill_manual(values = colores)+
+  ylab("Cantidad de personas")+
+  xlab("Fracción de eyección en porcentaje (%)")+
+  theme_minimal()+
+  scale_y_continuous(limits = c(0, 41), breaks = seq(0, 35, by = 5), minor_breaks = seq(0, 35, by = 5))+
+  scale_x_continuous(limits = c(10, 85), breaks = seq(10, 80, by = 10), minor_breaks = seq(10, 80, by = 10))+
+  theme(text=element_text(size=16,  family="Times New Roman"))
+
+
+plaquetas <- data.frame(Plaquetas = c(baseDatos$platelets[which(baseDatos$sex == 1)]/1000,                  
+                                         baseDatos$platelets[which(baseDatos$sex == 0)]/1000),
+                   Sexo = c(rep("Hombres", 194),
+                            rep("Mujeres", 105)))
+
+ggplot(plaquetas, aes(x = Plaquetas, fill = Sexo)) +   
+  geom_histogram(position = "identity", alpha = 0.8, bins = 50)+
+  xlab("Cantidad de plaquetas en millones por mililitro")+
+  theme_minimal()+
+  scale_fill_manual(values = colores)+
+  annotate("text", x = 300, y = 37.5, label = "Rango adecuado", color = 'darkgreen', size = 5, family="Times New Roman")+
+  annotate('rect', xmin=150, xmax=450, ymin=0, ymax=36, alpha=.3, color='darkgreen', fill = NA)+
+  scale_y_continuous(limits = c(0, 38), breaks = seq(0, 35, by = 5), minor_breaks = seq(0, 35, by = 5))+
+  scale_x_continuous(limits = c(0, 850), breaks = seq(0, 800, by = 100), minor_breaks = seq(0, 800, by = 100))+
+  theme(text=element_text(size=16,  family="Times New Roman"))
+
+creatina <- data.frame(Creatina = c(baseDatos$creatinine_phosphokinase[which(baseDatos$sex == 1)],
+                                          baseDatos$creatinine_phosphokinase[which(baseDatos$sex == 0)]),
+                        Sexo = c(rep("Hombres", 194),
+                                 rep("Mujeres", 105)))
+
+creatina$Creatina <- pmin(creatina$Creatina, rep(3000, 299))
+
+ggplot(creatina, aes(x = Creatina, fill = Sexo)) +   
+  geom_histogram(position = "identity", alpha = 0.8, bins = 30)+
+  ylab("Cantidad de personas")+
+  xlab("Creatina fosfoquinasa en microgramos por litro")+
+  theme_minimal()+
+  scale_fill_manual(values = colores)+
+  annotate("text", x = 400, y = 70, label = "Rango adecuado", color = 'darkgreen', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=0, xmax=200, ymin=0, ymax=67, alpha=.3, color='darkgreen', fill = NA)+
+  scale_y_continuous(limits = c(0, 70), breaks = seq(0, 60, by = 10), minor_breaks = seq(0, 60, by = 10))+
+  scale_x_continuous(limits = c(0, 3200), breaks = seq(0, 3000, by = 500), minor_breaks = seq(0, 2500, by = 500))+
+  theme(text=element_text(size=16,  family="Times New Roman"))
+
+
+
+sodio <- data.frame(Sodio = c(baseDatos$serum_sodium[which(baseDatos$sex == 1)],
+                                    baseDatos$serum_sodium[which(baseDatos$sex == 0)]),
+                       Sexo = c(rep("Hombres", 194),
+                                rep("Mujeres", 105)))
+
+ggplot(sodio, aes(x = Sodio, fill = Sexo)) +   
+  geom_histogram(position = "identity", alpha = 0.8, bins = 30)+
+  ylab("Cantidad de personas")+
+  scale_fill_manual(values = colores)+
+  xlab("Sodio sérico en miliequivalentes por litro")+
+  theme_minimal()+
+  annotate("text", x = 140, y = 43, label = "Rango adecuado", color = 'darkgreen', size = 5,  family="Times New Roman")+
+  annotate('rect', xmin=135, xmax=145, ymin=0, ymax=41.5, alpha=.3, color='darkgreen', fill = NA)+
+  scale_y_continuous(limits = c(0, 43), breaks = seq(0, 40, by = 5), minor_breaks = seq(0, 40, by = 5))+
+  scale_x_continuous(limits = c(112, 150), breaks = seq(110, 150, by = 5), minor_breaks = seq(110, 150, by = 5))+
+  theme(text=element_text(size=16,  family="Times New Roman"))
+
+
+```
+
