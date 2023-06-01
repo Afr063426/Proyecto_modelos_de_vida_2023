@@ -3,6 +3,17 @@
 library(tidyverse)
 library(xtable)
 library(ggcorrplot)
+library(readr)
+library(ggplot2)
+library(extrafont)
+library(grid)
+library(libcoin)
+library(mvtnorm)
+library(partykit)
+library(survival)
+library(party)
+
+
 
 #To set the default folder, it is going to be the folder where is the script
 directory <-dirname(rstudioapi::getSourceEditorContext()$path)
@@ -169,23 +180,13 @@ Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`, color =S
 
 
 
- ggsave("gg_asociasion.pdf",gg_asociasion)
+ # ggsave("gg_asociasion.pdf",gg_asociasion)
 
 ```
 
 #Graficos
 
-```{r}
 
-library(readr)
-library(ggplot2)
-library(extrafont)
-library(grid)
-library(libcoin)
-library(mvtnorm)
-library(partykit)
-
-```
 
 ```{r, warning=FALSE}
 #font_import()
@@ -334,10 +335,10 @@ ggplot(sodio, aes(x = Sodio, fill = Sexo)) +
 
 
 ```{r}
+library("partykit")
+library("survival")
 
-library(partykit)
 
-ctree_control(teststat = "quad")
 
 set.seed(31052023)
 
@@ -347,21 +348,54 @@ baseDatos80 <- baseDatos[-randomNumbers,]
 
 baseDatos20 <- baseDatos[randomNumbers,]
 
-arbol1 <- ctree(DEATH_EVENT ~ serum_sodium + serum_creatinine, data = baseDatos80)
+arbol1 <- ctree(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80, control = ctree_control(teststat = "quad", alpha = 0.01) )
+
 
 plot(arbol1)
 
-prediccionProb <- predict(arbol1, newdata = baseDatos20)
-  
-randomNumbers[prediccionProb>0.5]
 
-baseDatos[randomNumbers[prediccionProb>0.5],13]
+prediccionProb <- predict(arbol1, newdata = baseDatos20  )
 
-baseDatos[randomNumbers[prediccionProb<0.5],13]
+tail(baseDatos20)
 
-sum(unlist(baseDatos[randomNumbers[prediccionProb>0.5],13]))/length(which(prediccionProb>0.5))
+# 0.05
 
-1-sum(unlist(baseDatos[randomNumbers[prediccionProb<0.5],13]))/length(which(prediccionProb<0.5))
+
+prediccionProb <- predict(arbol1, newdata = baseDatos20, type = "node" )
+
+
+n<-predict(arbol1, type = "node" )
+
+
+
+a<-survfit(Surv(time, DEATH_EVENT)~1, data = baseDatos80, subset = (n==prediccionProb[1]) )
+
+prediccionProb[1]
+
+summary(a)
+
+plot(a)
+
+# ##
+
+nd <- factor(predict(arbol1, type = "node"))
+sf <- survfit(Surv(time, DEATH_EVENT) ~ nd, data = baseDatos80)
+summary(sf, time = 1500)
+
+plot(sf, col = 1:4)
+
+
+# ##
+#   
+# randomNumbers[prediccionProb>0.5]
+# 
+# baseDatos[randomNumbers[prediccionProb>0.5],13]
+# 
+# baseDatos[randomNumbers[prediccionProb<0.5],13]
+# 
+# sum(unlist(baseDatos[randomNumbers[prediccionProb>0.5],13]))/length(which(prediccionProb>0.5))
+# 
+# 1-sum(unlist(baseDatos[randomNumbers[prediccionProb<0.5],13]))/length(which(prediccionProb<0.5))
 
 ```
 
