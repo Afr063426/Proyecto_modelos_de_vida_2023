@@ -173,6 +173,7 @@ Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`, color =S
 
 ```
 
+#Graficos
 
 ```{r}
 
@@ -186,7 +187,7 @@ library(partykit)
 
 ```
 
-```{r}
+```{r, warning=FALSE}
 #font_import()
 #y
 
@@ -329,6 +330,37 @@ ggplot(sodio, aes(x = Sodio, fill = Sexo)) +
   scale_x_continuous(limits = c(112, 150), breaks = seq(110, 150, by = 5), minor_breaks = seq(110, 150, by = 5))+
   theme(text=element_text(size=16,  family="Times New Roman"))
 
+```
+
+
+```{r}
+library(partykit)
+
+ctree_control(teststat = "quad")
+
+set.seed(31052023)
+
+randomNumbers <- sample(1:299, 60, replace=F)
+
+baseDatos80 <- baseDatos[-randomNumbers,]
+
+baseDatos20 <- baseDatos[randomNumbers,]
+
+arbol1 <- ctree(DEATH_EVENT ~ serum_sodium + serum_creatinine, data = baseDatos80)
+
+plot(arbol1)
+
+prediccionProb <- predict(arbol1, newdata = baseDatos20)
+  
+randomNumbers[prediccionProb>0.5]
+
+baseDatos[randomNumbers[prediccionProb>0.5],13]
+
+baseDatos[randomNumbers[prediccionProb<0.5],13]
+
+sum(unlist(baseDatos[randomNumbers[prediccionProb>0.5],13]))/length(which(prediccionProb>0.5))
+
+1-sum(unlist(baseDatos[randomNumbers[prediccionProb<0.5],13]))/length(which(prediccionProb<0.5))
 
 ```
 
