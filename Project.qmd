@@ -334,6 +334,7 @@ ggplot(sodio, aes(x = Sodio, fill = Sexo)) +
 
 
 ```{r}
+
 library(partykit)
 
 ctree_control(teststat = "quad")
