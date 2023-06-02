@@ -399,3 +399,12 @@ plot(sf, col = 1:4)
 
 ```
 
+
+```{r}
+
+library(SurvMetrics)
+
+c <- Cindex(Surv(baseDatos20$time, baseDatos20$DEATH_EVENT), prediccionProb)
+
+```
+
