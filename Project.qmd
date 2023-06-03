@@ -429,3 +429,12 @@ ggsave(filename="Nodos.pdf",plot = b, width = 210  ,
 
 ```
 
+
+```{r}
+
+library(SurvMetrics)
+
+c <- Cindex(Surv(baseDatos20$time, baseDatos20$DEATH_EVENT), prediccionProb)
+
+```
+
