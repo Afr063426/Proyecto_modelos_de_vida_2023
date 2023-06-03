@@ -11,7 +11,7 @@ library(libcoin)
 library(mvtnorm)
 library(partykit)
 library(survival)
-library(party)
+# library(party)
 
 
 
@@ -335,12 +335,14 @@ ggplot(sodio, aes(x = Sodio, fill = Sexo)) +
 
 
 ```{r}
-library("partykit")
-library("survival")
 
 
+
+
+library(survminer)
 
 set.seed(31052023)
+
 
 randomNumbers <- sample(1:299, 60, replace=F)
 
@@ -348,7 +350,7 @@ baseDatos80 <- baseDatos[-randomNumbers,]
 
 baseDatos20 <- baseDatos[randomNumbers,]
 
-arbol1 <- ctree(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80, control = ctree_control(teststat = "quad", alpha = 0.01) )
+arbol1 <- ctree(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80, control = ctree_control(teststat = "quad", alpha = 0.05) )
 
 
 plot(arbol1)
@@ -356,33 +358,59 @@ plot(arbol1)
 
 prediccionProb <- predict(arbol1, newdata = baseDatos20  )
 
-tail(baseDatos20)
+
 
 # 0.05
 
 
-prediccionProb <- predict(arbol1, newdata = baseDatos20, type = "node" )
-
-
-n<-predict(arbol1, type = "node" )
-
-
-
-a<-survfit(Surv(time, DEATH_EVENT)~1, data = baseDatos80, subset = (n==prediccionProb[1]) )
-
-prediccionProb[1]
-
-summary(a)
-
-plot(a)
+# prediccionProb <- predict(arbol1, newdata = baseDatos20, type = "node" )
+# 
+# 
+# n<-predict(arbol1, type = "node" )
+# 
+# 
+# 
+# a<-survfit(Surv(time, DEATH_EVENT)~1, data = baseDatos80, subset = (n==prediccionProb[1]) )
+# 
+# prediccionProb[1]
+# 
+# summary(a)
+# 
+# plot(a)
 
 # ##
 
 nd <- factor(predict(arbol1, type = "node"))
-sf <- survfit(Surv(time, DEATH_EVENT) ~ nd, data = baseDatos80)
-summary(sf, time = 1500)
 
-plot(sf, col = 1:4)
+
+
+
+
+sf <- survfit(Surv(time, DEATH_EVENT) ~ nd, data = baseDatos80)
+summary(sf, time = 1500, extend = TRUE)
+
+
+a<-ggsurvplot(sf,ggtheme = theme_minimal(), font.family = "Times New Roman", censor.shape=124,censor.name  = "Censura", 
+              palette = c("#FF6384", "#36A2EB",  "#FFCE56", "#4BC0C0"))
+
+b<-a$plot+geom_text(aes(x = 350, y = .8, label = "Texto en la leyenda"), 
+                   show.legend = FALSE)+
+  labs(x="Tiempo en días", y ="Probabilidad de supervivencia", color = "Nodos", shape  = "Censura")+
+  theme(legend.position = "right")
+
+
+ggsave(filename="Nodos.pdf",plot = b, width = 210  ,
+  height = 297  , units = "mm" )
+
+
+#censor = FALSE, 
+
+
+
+
+
+
+
 
 
 # ##
@@ -396,6 +424,8 @@ plot(sf, col = 1:4)
 # sum(unlist(baseDatos[randomNumbers[prediccionProb>0.5],13]))/length(which(prediccionProb>0.5))
 # 
 # 1-sum(unlist(baseDatos[randomNumbers[prediccionProb<0.5],13]))/length(which(prediccionProb<0.5))
+
+
 
 ```
 
