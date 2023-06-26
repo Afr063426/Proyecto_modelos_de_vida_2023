@@ -348,7 +348,7 @@ baseDatos80 <- baseDatos[indice,]
 baseDatos20 <- baseDatos[-indice,]
 
 arbol1 <- ctree(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80, control = ctree_control(teststat = "quad", alpha = 0.05) )
-plot(arbol1)
+
 
 
 prediccionProb <- predict(arbol1, newdata = baseDatos20 , type = "node" )
@@ -359,14 +359,21 @@ summary(sf, time = 1500, extend = TRUE)
 
 
 
-gg_surv<-ggsurvplot(sf,ggtheme = theme_minimal(), font.family = "Times New Roman", censor.shape=124,censor.name  = "Censura", 
+gg_surv<-ggsurvplot(sf,ggtheme = theme_minimal(), font.family = "Times New Roman", censor.shape=124,censor.name  = "Censura", fontsize=15,
               palette = c("#FF6384", "#36A2EB",  "#FFCE56", "#4BC0C0"))
-
+gg_surv
 gg_surv<-gg_surv$plot+
   labs(x="Tiempo en días", y ="Probabilidad de supervivencia", color = "Nodos", shape  = "Censura")+
   theme(legend.position = "right")
 
-gg_surv
+
+
+pdf("Arbol.pdf",    width = 11, height = 7)
+plot(arbol1)
+dev.off()
+
+ggsave(file="Suv_lines.pdf", plot=gg_surv, width=11, height=7)
+
 ```
 
 
@@ -387,6 +394,198 @@ baseDatos20<-baseDatos20%>%left_join(probabilidad_de_sobrevivencia_por_nodo, by=
 
 Cindex(Surv(baseDatos20$time,baseDatos20$DEATH_EVENT ), baseDatos20$surv  )
 ```
+
+
+
+Ultima bitácora
+
+```{r}
+
+survregExp <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                      dist = "exponential")
+summary(survregExp)
+
+BIC(survregExp)
+
+
+a$scale
+
+
+```
+
+```{r}
+survregWeibull <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                          dist = "weibull")
+
+a<-survregWeibull%>%summary(type = "survival")
+a$icoef
+
+
+adjustedPlot(survregWeibull,type="plot")
+BIC(survregWeibull)
+```
+###################
+
+
+
+
+
+
+
+
+
+
+```{r}
+# library(autoReg)
+# adjustedPlot(survregWeibull,type="plot",addCox=TRUE)
+```
+
+```{r}
+# x=survreg(Surv(time, status) ~ sex, data=lung,dist="weibull")
+# adjustedPlot(x,addCox=TRUE)
+# x=survreg(Surv(time, status) ~ rx, data=anderson,dist="exponential")
+# adjustedPlot(x,addCox=TRUE)
+# x=survreg(Surv(time, status) ~ ph.ecog + age + sex, data=lung, dist="weibull")
+# pred.values=list(ph.ecog=0:3,sex=1:2,age=c(20,40,60,80))
+# adjustedPlot(x)
+# adjustedPlot(x,addCox=TRUE)
+# adjustedPlot(x,addCox=TRUE,xnames=c("ph.ecog","sex"),facet="sex")
+# adjustedPlot(x,pred.values=pred.values,addCox=TRUE,legend.position="top")+xlim(c(1,1000))
+# adjustedPlot(x,pred.values=pred.values,xnames=c("ph.ecog","sex","age"),facet=c("ph.ecog","sex"))
+# adjustedPlot(x,pred.values=pred.values,xnames=c("ph.ecog","sex","age"),facet=c("age","sex"))
+# adjustedPlot(x,pred.values=pred.values,addCox=TRUE)
+# adjustedPlot(x,addCox=TRUE)
+# adjustedPlot(x,pred.values=list(age=c(20,40,60,80),sex=1,ph.ecog=3),addCox=TRUE)
+
+```
+```{r}
+
+# # fit model
+# sr <- survreg(
+#   Surv(futime, fustat) ~ ecog.ps + rx,
+#   ovarian,
+#   dist = "exponential"
+# )
+# 
+# # summarize model fit with tidiers + visualization
+# tidy(sr)
+# augment(sr, ovarian)
+# glance(sr)
+# 
+# # coefficient plot
+# td <- tidy(sr, conf.int = TRUE)
+# 
+# library(ggplot2)
+# 
+# ggplot(td, aes(estimate, term)) +
+#   geom_point() +
+#   geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0) +
+#   geom_vline(xintercept = 0)
+```
+
+
+
+
+```{r}
+
+# library(ciTools)
+# probs <- ciTools::add_probs(baseDatos80, survregWeibull, q = 500,
+#                             name = c("prob", "lcb", "ucb"),
+#                             comparison = ">")
+# 
+# 
+# ggplot(probs, aes(x = age, y = prob)) +
+#     ggtitle("Estimated prob. of avg. spring lasting longer than 500 hrs.") +
+#     ylim(c(0,1)) +
+#     #facet_wrap(~car)+
+#     theme_bw() +
+#     geom_line(aes(y = prob)) 
+# 
+#     # geom_ribbon(aes(ymin = lcb, ymax = ucb), alpha = 0.5)
+```
+
+
+```{r}
+
+
+
+# Calcular las probabilidades de supervivencia estimadas
+times <- seq(0, max(baseDatos80$time), length.out = 100)
+surv_prob_weibull <- 1- pweibull(times, shape = 1/survregWeibull$icoef[2] , scale =exp(survregWeibull$icoef[1]))
+
+
+
+
+
+
+
+df1 <- data.frame(Time = times,
+                 Survival_Probability = pexp( -survregExp$coefficients[1]*times   ), Dist="Exp")
+
+# Crear un data frame con los valores
+df2 <- data.frame(Time = times, Survival_Probability = surv_prob_weibull, Dist="Weibull")
+
+df3<-rbind(df1, df2)
+
+# Graficar la distribución Weibull con ggplot2
+ggplot(df3, aes(x = Time, y = Survival_Probability, colour = Dist)) +
+  geom_line() +
+  labs(x = "Tiempo", y = "Probabilidad de supervivencia",
+       title = "Distribución Weibull") +
+  theme_minimal()
+```
+
+
+
+#################
+
+
+
+Modelos que solo son acelerados
+
+```{r}
+survregLogNormal <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                            dist = "lognormal")
+summary(survregLogNormal)
+
+adjustedPlot(survregLogNormal,type="plot")
+
+
+BIC(survregLogNormal)
+```
+
+
+
+```{r}
+
+times <- seq(0, 100, by = 0.1)
+surv_prob <- 1 - plnorm(times, meanlog = survregLogNormal$coef[1], sdlog = exp(survregLogNormal$coef[2]))
+
+# Crear el gráfico
+plot(times, surv_prob, type = "l", xlab = "Tiempo", ylab = "Probabilidad de supervivencia",
+     main = "Distribución Lognormal", ylim = c(0, 1))
+```
+
+
+
+```{r}
+survregLogLogistic <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                              dist = "loglogistic")
+summary(survregLogLogistic)
+adjustedPlot(survregLogLogistic,type="plot")
+
+BIC(survregLogLogistic)
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -446,5 +645,6 @@ Cindex(Surv(baseDatos20$time,baseDatos20$DEATH_EVENT ), baseDatos20$surv  )
 # print(cindex_result)
 
 ```
+
 
 
