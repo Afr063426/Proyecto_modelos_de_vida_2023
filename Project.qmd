@@ -444,6 +444,8 @@ backward_model <- step(survregExp, criteria = "BIC", direction = "backward", k =
 
 print(backward_model)
 
+Cindex(Surv(baseDatos20$time,baseDatos20$DEATH_EVENT ), baseDatos20$surv  )
+
 backward_model_weibull <- step(survregWeibull, criteria = "BIC", direction = "backward", k = log(nrow(baseDatos80)), trace = 1)
 
 print(backward_model_weibull)
