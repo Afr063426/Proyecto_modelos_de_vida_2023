@@ -15,7 +15,9 @@ library(survival)
 library(SurvMetrics)
 library(pec)
 library(survminer)
-
+library(coin)
+library(autoReg)
+library(caret)
 
 
 #To set the default folder, it is going to be the folder where is the script
@@ -338,7 +340,6 @@ ggplot(sodio, aes(x = Sodio, fill = Sexo)) +
 
 
 ```{r}
-library(caret)
 
 set.seed(3105203)
 indice<-createDataPartition(baseDatos$DEATH_EVENT, p=0.8, list = FALSE)
