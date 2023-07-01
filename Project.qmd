@@ -421,10 +421,10 @@ a$scale
 
 survregExp <- survreg(Surv(time, DEATH_EVENT) ~ age + ejection_fraction + serum_creatinine, data = baseDatos80, dist = "exponential", x = T)
 
-#adjustedPlot(survregExp,type="plot")
-
+adjustedPlot(survregExp, type="plot")
 
 ```
+
 
 ```{r}
 survregWeibull <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
@@ -583,8 +583,9 @@ data <- data.frame(time = H0_modelo_exp_CS$time, hazard = H0_modelo_exp_CS$hazar
 Residuos <- ggplot(data, aes(x = time, y = hazard)) +
   geom_point(color = "36A2EB") +  # Add points for the data
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#FF6384") +  # Add the reference line
-  labs(x = "Tiempo en días", y = "Tasa de riesgo") +  # Add axis labels
-  theme_minimal()
+  labs(x = "Residuos", y = "Hazard rate acumulada") +  # Add axis labels
+  theme_minimal()+
+  theme(text=element_text(size=16,  family="Times New Roman"))
   # Apply a minimal theme to the plot
 
 dev.off()
