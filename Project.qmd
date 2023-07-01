@@ -424,7 +424,117 @@ a$icoef
 adjustedPlot(survregWeibull,type="plot")
 BIC(survregWeibull)
 ```
-###################
+
+
+
+
+
+
+Modelos que solo son acelerados
+
+```{r}
+survregLogNormal <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                            dist = "lognormal")
+summary(survregLogNormal)
+
+adjustedPlot(survregLogNormal,type="plot")
+
+
+BIC(survregLogNormal)
+```
+
+
+
+```{r}
+
+times <- seq(0, 100, by = 0.1)
+surv_prob <- 1 - plnorm(times, meanlog = survregLogNormal$coef[1], sdlog = exp(survregLogNormal$coef[2]))
+
+# Crear el gráfico
+plot(times, surv_prob, type = "l", xlab = "Tiempo", ylab = "Probabilidad de supervivencia",
+     main = "Distribución Lognormal", ylim = c(0, 1))
+```
+
+
+
+```{r}
+survregLogLogistic <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
+                              dist = "loglogistic")
+summary(survregLogLogistic)
+adjustedPlot(survregLogLogistic,type="plot")
+
+BIC(survregLogLogistic)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# party_tree <- partykit::as.party(arbol1)
+# 
+# # Compute the concordance index
+# c_index <- cindex(party_tree)
+# 
+# 
+# predict(Surv(baseDatos20$time, baseDatos20$DEATH_EVENT), type = "node")
+# 
+# surv_object <- Surv(baseDatos20$time, baseDatos20$DEATH_EVENT)
+# 
+# fit <- survfit(surv_object ~ 1)
+# 
+# 
+# CI <- pec::cindex(object = fit, 
+#              formula = surv_object ~ 1,
+#              data = baseDatos20)
+# 
+# surv_prob <- predict(fit, type = "survival")
+# 
+# pec::cindex(prediccionProb, 
+#             baseDatos20$time,
+#             baseDatos20$DEATH_EVENT)
+# 
+# 
+# remove(lung)
+
+```
+
+```{r}
+
+
+# baseDatos <- read_csv("data/heart_failure_clinical_records_dataset.csv")
+# 
+# fit <- coxph(Surv(time, DEATH_EVENT) ~ ., data = baseDatos)
+# 
+# # Extract the estimated survival probabilities from the Cox model
+# surv_prob <- predict(fit, type = "survival")
+# 
+# # Extract the observed survival (time) and censoring information from the heart failure data set
+# obs_time <- baseDatos$time
+# obs_event <- baseDatos$DEATH_EVENT
+# 
+# # Calculate the C-Index using the pec::cindex function and the predicted survival probabilities and observed survival (time) and censoring information
+# cindex_result <- cindex(surv_prob, obs_time, obs_event)
+# 
+# # Print the resulting C-Index
+# print(cindex_result)
+
+```
+
 
 
 
@@ -538,113 +648,4 @@ ggplot(df3, aes(x = Time, y = Survival_Probability, colour = Dist)) +
 
 
 #################
-
-
-
-Modelos que solo son acelerados
-
-```{r}
-survregLogNormal <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
-                            dist = "lognormal")
-summary(survregLogNormal)
-
-adjustedPlot(survregLogNormal,type="plot")
-
-
-BIC(survregLogNormal)
-```
-
-
-
-```{r}
-
-times <- seq(0, 100, by = 0.1)
-surv_prob <- 1 - plnorm(times, meanlog = survregLogNormal$coef[1], sdlog = exp(survregLogNormal$coef[2]))
-
-# Crear el gráfico
-plot(times, surv_prob, type = "l", xlab = "Tiempo", ylab = "Probabilidad de supervivencia",
-     main = "Distribución Lognormal", ylim = c(0, 1))
-```
-
-
-
-```{r}
-survregLogLogistic <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
-                              dist = "loglogistic")
-summary(survregLogLogistic)
-adjustedPlot(survregLogLogistic,type="plot")
-
-BIC(survregLogLogistic)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-# party_tree <- partykit::as.party(arbol1)
-# 
-# # Compute the concordance index
-# c_index <- cindex(party_tree)
-# 
-# 
-# predict(Surv(baseDatos20$time, baseDatos20$DEATH_EVENT), type = "node")
-# 
-# surv_object <- Surv(baseDatos20$time, baseDatos20$DEATH_EVENT)
-# 
-# fit <- survfit(surv_object ~ 1)
-# 
-# 
-# CI <- pec::cindex(object = fit, 
-#              formula = surv_object ~ 1,
-#              data = baseDatos20)
-# 
-# surv_prob <- predict(fit, type = "survival")
-# 
-# pec::cindex(prediccionProb, 
-#             baseDatos20$time,
-#             baseDatos20$DEATH_EVENT)
-# 
-# 
-# remove(lung)
-
-```
-
-```{r}
-
-
-# baseDatos <- read_csv("data/heart_failure_clinical_records_dataset.csv")
-# 
-# fit <- coxph(Surv(time, DEATH_EVENT) ~ ., data = baseDatos)
-# 
-# # Extract the estimated survival probabilities from the Cox model
-# surv_prob <- predict(fit, type = "survival")
-# 
-# # Extract the observed survival (time) and censoring information from the heart failure data set
-# obs_time <- baseDatos$time
-# obs_event <- baseDatos$DEATH_EVENT
-# 
-# # Calculate the C-Index using the pec::cindex function and the predicted survival probabilities and observed survival (time) and censoring information
-# cindex_result <- cindex(surv_prob, obs_time, obs_event)
-# 
-# # Print the resulting C-Index
-# print(cindex_result)
-
-```
-
-
 
