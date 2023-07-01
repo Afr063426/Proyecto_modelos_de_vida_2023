@@ -18,6 +18,7 @@ library(survminer)
 library(coin)
 library(autoReg)
 library(caret)
+library(survminer)
 
 
 #To set the default folder, it is going to be the folder where is the script
@@ -194,8 +195,7 @@ Datos_aux_g%>%ggplot(aes(x=Invervalos_Edad, y=`Fracción de eyección`, color =S
 
 
 ```{r, warning=FALSE}
-#font_import()
-#y
+font_import()
 
 colores <- c("#619CFF", "#F8766D")
 
@@ -401,7 +401,6 @@ Cindex(Surv(baseDatos20$time,baseDatos20$DEATH_EVENT ), baseDatos20$surv  )
 Ultima bitácora
 
 ```{r}
-
 survregExp <- survreg(Surv(time, DEATH_EVENT) ~ ., data = baseDatos80,
                       dist = "exponential")
 summary(survregExp)
@@ -410,8 +409,19 @@ BIC(survregExp)
 
 AIC(survregExp)
 
+adjustedPlot(survregExp,type="plot")
+
 
 a$scale
+
+```
+
+
+```{r}
+
+survregExp <- survreg(Surv(time, DEATH_EVENT) ~ age + ejection_fraction + serum_creatinine, data = baseDatos80, dist = "exponential", x = T)
+
+#adjustedPlot(survregExp,type="plot")
 
 
 ```
@@ -430,6 +440,51 @@ BIC(survregWeibull)
 AIC(survregWeibull)
 ```
 ###################
+
+
+
+
+```{r, warning=FALSE}
+
+survregExp <- survreg(Surv(time, DEATH_EVENT) ~ age + ejection_fraction + serum_creatinine, data = baseDatos80, dist = "exponential", x = T)
+
+lambda <- exp(-coefficients(survregExp)[1]/survregExp$scale)
+
+betas <- as.matrix(-coefficients(survregExp)[-1]/survregExp$scale)
+
+rCox <- lambda*baseDatos80$time*exp(t(betas)%*%t(survregExp$x[,-1]))
+
+baseDatos80$rCox <- t(rCox)
+
+modelo_exp_CoxSnell <- coxph(Surv(rCox, DEATH_EVENT) ~ 1, data = baseDatos80)
+
+H0_modelo_exp_CS <- basehaz(modelo_exp_CoxSnell, centered = F)
+
+plot(H0_modelo_exp_CS$time, H0_modelo_exp_CS$hazard)
+
+abline(a = 0, b = 1)
+
+
+data <- data.frame(time = H0_modelo_exp_CS$time, hazard = H0_modelo_exp_CS$hazard)
+
+#palette = c("#FF6384", "#36A2EB",  "#FFCE56", "#4BC0C0")
+
+# Create the ggplot object and specify the data and aesthetics
+Residuos <- ggplot(data, aes(x = time, y = hazard)) +
+  geom_point(color = "36A2EB") +  # Add points for the data
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#FF6384") +  # Add the reference line
+  labs(x = "Tiempo en días", y = "Tasa de riesgo") +  # Add axis labels
+  theme_minimal()
+  # Apply a minimal theme to the plot
+
+dev.off()
+plot(Residuos)
+
+ggsave(filename = "Residuos.pdf", plot = Residuos, width = 7, height = 5)
+
+print(Residuos)
+
+```
 
 
 
